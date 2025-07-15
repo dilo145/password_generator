@@ -1,0 +1,119 @@
+import { Button, CheckBox, SpinBox, LineEdit, TextEdit, VerticalBox, HorizontalBox, GroupBox, ScrollView } from "std-widgets.slint";
+
+export component AppWindow inherits Window {
+    title: "Générateur de mots de passe";
+    preferred-width: 800px;
+    preferred-height: 600px;
+
+    // Properties for password configuration
+    in-out property <int> password-length: 12;
+    in-out property <bool> include-lowercase: true;
+    in-out property <bool> include-uppercase: true;
+    in-out property <bool> include-numbers: true;
+    in-out property <bool> include-symbols: false;
+    in-out property <string> excluded-chars: "";
+    in-out property <int> password-count: 1;
+
+    // Output properties
+    in-out property <string> generated-passwords: "";
+
+    // Callbacks
+    callback generate-password();
+    callback copy-to-clipboard(string);
+
+    VerticalBox {
+        padding: 20px;
+        spacing: 15px;
+
+        // Configuration Section
+        GroupBox {
+            title: "Configuration du mot de passe";
+
+            VerticalBox {
+                spacing: 10px;
+
+                HorizontalBox {
+                    Text { text: "Longueur:"; }
+                    SpinBox {
+                        value <=> root.password-length;
+                        minimum: 1;
+                        maximum: 128;
+                    }
+                }
+
+                HorizontalBox {
+                    Text { text: "Nombre de mots de passe:"; }
+                    SpinBox {
+                        value <=> root.password-count;
+                        minimum: 1;
+                        maximum: 20;
+                    }
+                }
+
+                CheckBox {
+                    text: "Inclure les lettres minuscules (a-z)";
+                    checked <=> root.include-lowercase;
+                }
+
+                CheckBox {
+                    text: "Inclure les lettres majuscules (A-Z)";
+                    checked <=> root.include-uppercase;
+                }
+
+                CheckBox {
+                    text: "Inclure les chiffres (0-9)";
+                    checked <=> root.include-numbers;
+                }
+
+                CheckBox {
+                    text: "Inclure les symboles (!@#$%...)";
+                    checked <=> root.include-symbols;
+                }
+
+                HorizontalBox {
+                    Text { text: "Caractères à exclure:"; }
+                    LineEdit {
+                        text <=> root.excluded-chars;
+                        placeholder-text: "Entrez les caractères à exclure";
+                    }
+                }
+
+
+            }
+        }
+
+        // Action Buttons
+        HorizontalBox {
+            alignment: center;
+            spacing: 10px;
+
+            Button {
+                text: "Générer";
+                primary: true;
+                clicked => {
+                    root.generate-password();
+                }
+            }
+
+            Button {
+                text: "Copier";
+                enabled: root.generated-passwords != "";
+                clicked => {
+                    root.copy-to-clipboard(root.generated-passwords);
+                }
+            }
+        }
+
+        // Results Section
+        GroupBox {
+            title: "Mots de passe générés";
+
+            TextEdit {
+                text <=> root.generated-passwords;
+                read-only: true;
+                wrap: word-wrap;
+                preferred-height: 150px;
+            }
+        }
+    }
+}
